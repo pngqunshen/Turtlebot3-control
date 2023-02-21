@@ -40,6 +40,64 @@ std::vector<Position> post_process(std::vector<Position> path, Grid &grid) // re
     return post_process_path;
 }
 
+std::vector<Position> get_velocities(std::vector<Position> turning_points) /// get velocities at turning points
+{
+    std::vector<Position> velocities = {Position(0,0)};
+    int length = turning_points.size();
+
+    for (int i = 1; i < length - 1; i++){
+        double dx = turning_points[i+1].x - turning_points[i-1].x;
+        double dy = turning_points[i+1].y - turning_points[i-1].y;
+        
+        double  theta = atan2(dy, dx);
+        Position velocity = {0.22 * cos(theta), 0.22 * sin(theta)};
+        velocities.push_back(velocity);
+    }
+    velocities.push_back(Position(0,0));
+    return velocities;
+}
+
+std::vector<Position> generate_trajectory(Position pos_begin, Position pos_end, Position vel_begin, Position vel_end, double average_speed, double target_dt){
+    double Dx = pos_end.x - pos_begin.x;
+    double Dy = pos_end.y - pos_begin.y;
+    double duration = sqrt(Dx*Dx + Dy*Dy) / average_speed;
+
+    double xCoefficients[6] = {0,0,0,0,0,0};
+    double Minv[6][6] = 
+        {{1, 0, 0, 0, 0, 0},
+        {0, 1, 0, 0, 0, 0},
+        {0, 0, 0.5, 0, 0, 0},
+        {-10/pow(duration, 3), -6/pow(duration,2), -3/(2*duration), 10/pow(duration,3), -4/pow(duration,2), 1/(2*duration)},
+        {15/pow(duration,4), 8/pow(duration,3), 3/(2*pow(duration,2)), -15/pow(duration,4), 7/pow(duration,3), -1/pow(duration,2)},
+        {-6/pow(duration,5), -3/pow(duration,4), -1/(2*pow(duration,3)), 6/pow(duration,5), -3/pow(duration,4), 1/(2*pow(duration,3))
+        }};
+    double x[6] = {pos_begin.x, vel_begin.x, 0, pos_end.x, vel_end.x, 0};
+
+    double yCoefficients[6] = {0,0,0,0,0,0};
+    double yMinv[6][6];
+    double y[6] = {pos_begin.y, vel_begin.y, 0, pos_end.y, vel_end.y, 0};
+
+
+    for(int i = 0; i < 6; i++){
+        for (int j = 0; j < 6; i++){
+            xCoefficients[i] += (Minv[j][i] * x[j]);
+            yCoefficients[i] += (Minv[j][i] * y[j]);
+        }
+    }
+    std::vector<Position> trajectory = {pos_begin};
+
+    for (int i = 0; i < duration/target_dt; i++){
+        Position interpolated_target = {0,0};
+        for (int j = 0; j < 6; j++){
+            interpolated_target.x += xCoefficients[j] * pow(target_dt * i,j);
+            interpolated_target.y += yCoefficients[j] * pow(target_dt * i,j);
+        }
+        trajectory.push_back(interpolated_target);
+    }
+    return trajectory;
+}
+
+
 std::vector<Position> generate_trajectory(Position pos_begin, Position pos_end, double average_speed, double target_dt, Grid & grid)
 {
     // (1) estimate total duration
