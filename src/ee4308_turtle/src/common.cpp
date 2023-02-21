@@ -84,3 +84,7 @@ double saturate(double upper, double lower, double value)
     }
     return value;
 }
+double round_up(double value, int decimal_places) {
+    const double multiplier = std::pow(10.0, decimal_places);
+    return std::ceil(value * multiplier) / multiplier;
+}

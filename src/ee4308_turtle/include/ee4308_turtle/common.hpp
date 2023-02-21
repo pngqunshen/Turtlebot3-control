@@ -22,5 +22,6 @@ double dist_euc(double src_x, double src_y, double tgt_x, double tgt_y);
 double heading(Position src, Position tgt); // overload
 double limit_angle(double angle);
 double saturate(double upper, double lower, double value);
+double round_up(double value, int decimal_places);
 
 #endif

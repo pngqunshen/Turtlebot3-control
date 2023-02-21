@@ -84,8 +84,36 @@ std::vector<Index> Planner::get(Index idx_start, Index idx_goal)
     Node * node = &(nodes[k]);
     node->g = 0;
 
-    // add start node to openlist
-    add_to_open(node);
+    // append all accessible neighbors around start to open list
+    for (int dir = 0; dir < 8; ++dir)
+    {
+        // get their index
+        Index & idx_nb_relative = NB_LUT[dir];
+        Index idx_nb(
+            node->idx.i + idx_nb_relative.i,
+            node->idx.j + idx_nb_relative.j
+        );
+
+        // check if in map and accessible
+        if (!grid.get_cell(idx_nb))
+        {   // if not, move to next nb
+            continue;
+        }
+
+        // find costs
+        double tg_cost = dist_euc(idx_nb, idx_start);
+        double h_cost = dist_euc(idx_nb, idx_goal);
+        double rf_cost = round_up(tg_cost, 5);
+
+        // assign parent
+        int nb_k = grid.get_key(idx_nb);
+        Node & nb_node = nodes[nb_k];
+        nb_node.g = round_up(tg_cost, 5);
+        nb_node.parent = node->idx;
+
+        // add to open
+        add_to_open(&nb_node);
+    }
 
     // main loop
     while (!open_list.empty())
@@ -120,10 +148,8 @@ std::vector<Index> Planner::get(Index idx_start, Index idx_goal)
         }
 
         // (4) check neighbors and add them if cheaper
-        bool is_cardinal = true;
         for (int dir = 0; dir < 8; ++dir)
         {   // for each neighbor in the 8 directions
-
             // get their index
             Index & idx_nb_relative = NB_LUT[dir];
             Index idx_nb(
@@ -137,28 +163,34 @@ std::vector<Index> Planner::get(Index idx_start, Index idx_goal)
                 continue;
             }
 
-            // get the cost if accessing from node as parent
-            double g_nb = node->g;
-            if (is_cardinal) 
-                g_nb += 1;
-            else
-                g_nb += M_SQRT2;
-            // the above if else can be condensed using ternary statements: g_nb += is_cardinal ? 1 : M_SQRT2;
+            // assume LOS and assign node parents first
+            Index par = node->parent;
+
+            // check if nb_cell has LOS to current cell’s parent
+            for (Index los_ind : grid.los.get(par, idx_nb)) {
+                // check if in map and accessible
+                if (!grid.get_cell(los_ind))
+                {   // no line of sight
+                    par = node->idx;
+                    break;
+                }
+            }
+
+            // get tentative g cost
+            double tg_cost = dist_euc(idx_nb, par);
 
             // compare the cost to any previous costs. If cheaper, mark the node as the parent
             int nb_k = grid.get_key(idx_nb);
             Node & nb_node = nodes[nb_k]; // use reference so changing nb_node changes nodes[k]
-            if (nb_node.g > g_nb + 1e-5)
+            if (round_up(nb_node.g, 5) > round_up(tg_cost, 5))
             {   // previous cost was more expensive, rewrite with current
-                nb_node.g = g_nb;
-                nb_node.parent = node->idx;
+                nb_node.g = tg_cost;
+                nb_node.h = dist_euc(idx_nb, idx_goal);
+                nb_node.parent = par;
 
                 // add to open
                 add_to_open(&nb_node); // & a reference means getting the pointer (address) to the reference's object.
             }
-
-            // toggle is_cardinal
-            is_cardinal = !is_cardinal;
         }
     }
 
