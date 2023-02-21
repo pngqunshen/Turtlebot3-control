@@ -1,4 +1,5 @@
 #include "grid.hpp"
+#include <queue>
 
 // constructor
 Grid::Grid(Position pos_min, Position pos_max, double cell_size, double inflation_radius, int log_odds_thresh, int log_odds_cap)
@@ -36,6 +37,8 @@ bool Grid::get_cell(Position pos)
 {
     return get_cell(pos2idx(pos));
 }
+
+
 
 void Grid::generate_mask_inflation(double inflation_radius)
 {
@@ -180,4 +183,36 @@ void Grid::write_to_msg(nav_msgs::OccupancyGrid &msg_grid_lo, nav_msgs::Occupanc
             msg_grid_inf.data[k] = -1;
         msg_grid_lo.data[k] = (((double) grid_log_odds[k]) / log_odds_cap + 1) * 50;
     }
+}
+
+//IMPLEMENTED BY SAMUEL
+Position Grid::closestFreeSpace(Position pos_goal)
+{
+    std::queue<Position> frontier;
+    frontier.push(pos_goal);
+
+    Position curr_node;
+    while (!frontier.empty()) {
+        curr_node = frontier.front();
+        frontier.pop();
+        Index curr_idx = pos2idx(curr_node);
+        int k = get_key(curr_idx);
+        if (grid_inflation[k]  <= 0)
+        {
+            return curr_node;
+        }
+        
+        int pos_x = curr_node.x;
+        int pos_y = curr_node.y;
+
+        for (int i = -1; i < 2; i++) {
+            for(int j = -1; j < 2; j++) {
+                Position newPos = Position(pos_x + i, pos_y + j);
+                if (!out_of_map(pos2idx(newPos))) {
+                    frontier.push(newPos);
+                }
+            }
+        }
+    }
+    return pos_goal;
 }
