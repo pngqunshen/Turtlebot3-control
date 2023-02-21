@@ -189,6 +189,7 @@ void Grid::write_to_msg(nav_msgs::OccupancyGrid &msg_grid_lo, nav_msgs::Occupanc
 Position Grid::closestFreeSpace(Position pos_goal)
 {
     std::queue<Position> frontier;
+    std::set<int> visited_indexes;
     frontier.push(pos_goal);
 
     Position curr_node;
@@ -197,6 +198,8 @@ Position Grid::closestFreeSpace(Position pos_goal)
         frontier.pop();
         Index curr_idx = pos2idx(curr_node);
         int k = get_key(curr_idx);
+        visited_indexes.insert(k);
+
         if (grid_inflation[k]  <= 0)
         {
             return curr_node;
@@ -208,7 +211,7 @@ Position Grid::closestFreeSpace(Position pos_goal)
         for (int i = -1; i < 2; i++) {
             for(int j = -1; j < 2; j++) {
                 Position newPos = Position(pos_x + i, pos_y + j);
-                if (!out_of_map(pos2idx(newPos))) {
+                if (!out_of_map(pos2idx(newPos)) && visited_indexes.find(get_key(pos2idx(newPos))) == visited_indexes.end() ) {
                     frontier.push(newPos);
                 }
             }
