@@ -310,7 +310,7 @@ int main(int argc, char **argv)
                 if (!grid.get_cell(pos_rbt))
                     ROS_WARN(" TMAIN : Robot lies on inaccessible area. No path can be found");
                 if (!grid.get_cell(pos_goal)) {
-                    //UPDATED BY SAMUEL
+                    // UPDATED BY SAMUEL
                     Position updated_pos_goal = grid.closestFreeSpace(pos_goal);
                     if (updated_pos_goal.x == pos_goal.x && updated_pos_goal.y == pos_goal.y){
                         ROS_WARN(" TMAIN : Goal lies on inaccessible area. No path can be found");
