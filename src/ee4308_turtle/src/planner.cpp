@@ -83,6 +83,7 @@ std::vector<Index> Planner::get(Index idx_start, Index idx_goal)
     ROS_INFO("idx_goal %d %d", idx_goal.i, idx_goal.j);
     Node * node = &(nodes[k]);
     node->g = 0;
+    node->parent = node->idx;
 
     // append all accessible neighbors around start to open list
     for (int dir = 0; dir < 8; ++dir)
@@ -178,7 +179,7 @@ std::vector<Index> Planner::get(Index idx_start, Index idx_goal)
             }
 
             // get tentative g cost
-            double tg_cost = dist_euc(idx_nb, par);
+            double tg_cost = dist_euc(idx_nb, par) + nodes[grid.get_key(node->parent)].g;
 
             // compare the cost to any previous costs. If cheaper, mark the node as the parent
             int nb_k = grid.get_key(idx_nb);
