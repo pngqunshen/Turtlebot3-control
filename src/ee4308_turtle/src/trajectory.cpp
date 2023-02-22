@@ -79,9 +79,9 @@ std::vector<Position> generate_trajectory(Position pos_begin, Position pos_end, 
 
 
     for(int i = 0; i < 6; i++){
-        for (int j = 0; j < 6; i++){
-            xCoefficients[i] += (Minv[j][i] * x[j]);
-            yCoefficients[i] += (Minv[j][i] * y[j]);
+        for (int j = 0; j < 6; j++){
+            xCoefficients[i] += (Minv[i][j] * x[j]);
+            yCoefficients[i] += (Minv[i][j] * y[j]);
         }
     }
     std::vector<Position> trajectory = {pos_begin};

@@ -83,6 +83,7 @@ std::vector<Index> Planner::get(Index idx_start, Index idx_goal)
     ROS_INFO("idx_goal %d %d", idx_goal.i, idx_goal.j);
     Node * node = &(nodes[k]);
     node->g = 0;
+    node->parent = node->idx;
 
     // append all accessible neighbors around start to open list
     for (int dir = 0; dir < 8; ++dir)
@@ -103,7 +104,6 @@ std::vector<Index> Planner::get(Index idx_start, Index idx_goal)
         // find costs
         double tg_cost = dist_euc(idx_nb, idx_start);
         double h_cost = dist_euc(idx_nb, idx_goal);
-        double rf_cost = round_up(tg_cost, 5);
 
         // assign parent
         int nb_k = grid.get_key(idx_nb);
@@ -177,15 +177,15 @@ std::vector<Index> Planner::get(Index idx_start, Index idx_goal)
             }
 
             // get tentative g cost
-            double tg_cost = dist_euc(idx_nb, par);
+            double tg_cost = dist_euc(idx_nb, par)+nodes[grid.get_key(par)].g;
 
             // compare the cost to any previous costs. If cheaper, mark the node as the parent
             int nb_k = grid.get_key(idx_nb);
             Node & nb_node = nodes[nb_k]; // use reference so changing nb_node changes nodes[k]
             if (round_up(nb_node.g, 5) > round_up(tg_cost, 5))
             {   // previous cost was more expensive, rewrite with current
-                nb_node.g = tg_cost;
-                nb_node.h = dist_euc(idx_nb, idx_goal);
+                nb_node.g = round_up(tg_cost, 5);
+                nb_node.h = round_up(dist_euc(idx_nb, idx_goal), 5);
                 nb_node.parent = par;
 
                 // add to open
