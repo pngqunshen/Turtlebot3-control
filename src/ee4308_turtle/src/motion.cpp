@@ -182,7 +182,7 @@ int main(int argc, char **argv)
             wheel_l_prev = wheel_l;
             wheel_r_prev = wheel_r;
             double v_odom = wheel_radius / 2 / dt * (d_wheel_r + d_wheel_l);
-            double w_odom = wheel_radius / axle_track / dt * (d_wheel_r - d_wheel_l);
+            double w_odom = wheel_radius / axle_track / dt * (d_wheel_l - d_wheel_r);
 
             // imu measurement
             double v_imu = lin_vel + imu_lin_acc * dt;

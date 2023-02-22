@@ -200,7 +200,7 @@ Position Grid::closestFreeSpace(Position pos_goal)
         int k = get_key(curr_idx);
         visited_indexes.insert(k);
 
-        if (grid_inflation[k]  <= 0)
+        if (get_cell(curr_node))
         {
             return curr_node;
         }

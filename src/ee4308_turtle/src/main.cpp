@@ -315,7 +315,7 @@ int main(int argc, char **argv)
                     if (updated_pos_goal.x == pos_goal.x && updated_pos_goal.y == pos_goal.y){
                         ROS_WARN(" TMAIN : Goal lies on inaccessible area. No path can be found");
                     } else {
-                        goals[g] = updated_pos_goal;
+                        pos_goal = updated_pos_goal;
                     }
                 }
             }
