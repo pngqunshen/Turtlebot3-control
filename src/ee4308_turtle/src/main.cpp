@@ -259,8 +259,9 @@ int main(int argc, char **argv)
                         Position &turn_pt_cur = post_process_path[m];
                         Position &vel_next = velocities[m - 1];
                         Position &vel_cur = velocities[m];
+                        // std::vector<Position> traj = generate_trajectory(turn_pt_next, turn_pt_cur, average_speed, target_dt, grid);
 
-                        std::vector<Position> traj = generate_trajectory(turn_pt_next, turn_pt_cur,vel_cur, vel_next, average_speed, target_dt);
+                        std::vector<Position> traj = generate_trajectory(turn_pt_next, turn_pt_cur,vel_next, vel_cur, average_speed, target_dt);
                         for (Position &pos_tgt : traj)
                         {
                             trajectory.push_back(pos_tgt);
