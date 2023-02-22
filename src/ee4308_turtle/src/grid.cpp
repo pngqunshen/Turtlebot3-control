@@ -205,12 +205,14 @@ Position Grid::closestFreeSpace(Position pos_goal)
             return curr_node;
         }
         
-        int pos_x = curr_node.x;
-        int pos_y = curr_node.y;
+        double pos_x = curr_node.x;
+        double pos_y = curr_node.y;
 
         for (int i = -1; i < 2; i++) {
             for(int j = -1; j < 2; j++) {
-                Position newPos = Position(pos_x + i, pos_y + j);
+                double eye = i;
+                double jay = j;
+                Position newPos = Position( pos_x + (eye * cell_size), pos_y + (jay * cell_size));
                 if (!out_of_map(pos2idx(newPos)) && visited_indexes.find(get_key(pos2idx(newPos))) == visited_indexes.end() ) {
                     frontier.push(newPos);
                 }

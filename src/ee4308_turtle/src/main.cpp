@@ -201,6 +201,7 @@ int main(int argc, char **argv)
         else if (!is_safe_trajectory(trajectory, grid))
         { // request a new path if path intersects inaccessible areas, or if there is no path
             replan = true;
+            ROS_INFO("not safe");
         }
 
         // always try to publish the next target so it does not get stuck waiting for a new path.
@@ -250,9 +251,7 @@ int main(int argc, char **argv)
                     // generate trajectory over all turning points
                     // doing the following manner results in the front of trajectory being the goal, and the back being close to the rbt position
                     trajectory.clear();
-
                     std::vector<Position> velocities = get_velocities(post_process_path);
-
                     for (int m = 1; m < post_process_path.size(); ++m)
                     {
                         Position &turn_pt_next = post_process_path[m - 1];
@@ -260,7 +259,6 @@ int main(int argc, char **argv)
                         Position &vel_next = velocities[m - 1];
                         Position &vel_cur = velocities[m];
                         // std::vector<Position> traj = generate_trajectory(turn_pt_next, turn_pt_cur, average_speed, target_dt, grid);
-
                         std::vector<Position> traj = generate_trajectory(turn_pt_next, turn_pt_cur,vel_next, vel_cur, average_speed, target_dt);
                         for (Position &pos_tgt : traj)
                         {
@@ -317,6 +315,7 @@ int main(int argc, char **argv)
                         ROS_WARN(" TMAIN : Goal lies on inaccessible area. No path can be found");
                     } else {
                         pos_goal = updated_pos_goal;
+                        ROS_INFO_STREAM("new goal " << pos_goal.x <<" " << pos_goal.y);
                     }
                 }
             }
