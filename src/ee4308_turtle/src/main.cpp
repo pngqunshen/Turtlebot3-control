@@ -9,6 +9,7 @@
 #include <sensor_msgs/LaserScan.h>
 #include <nav_msgs/Path.h>
 #include <nav_msgs/OccupancyGrid.h>
+#include <nav_msgs/Odometry.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/PointStamped.h>
 
@@ -30,6 +31,11 @@ void cbPose(const geometry_msgs::PoseStamped::ConstPtr &msg)
     double siny_cosp = 2 * (q.w * q.z + q.x * q.y);
     double cosy_cosp = 1 - 2 * (q.y * q.y + q.z * q.z);
     ang_rbt = atan2(siny_cosp, cosy_cosp);
+}
+nav_msgs::Odometry msg_odom;
+void cbOdom(const nav_msgs::Odometry::ConstPtr &msg)
+{
+    msg_odom = *msg;
 }
 
 int main(int argc, char **argv)
@@ -116,6 +122,7 @@ int main(int argc, char **argv)
     // subscribers
     ros::Subscriber sub_scan = nh.subscribe("scan", 1, &cbScan);
     ros::Subscriber sub_pose = nh.subscribe("pose", 1, &cbPose);
+    ros::Subscriber sub_odom = nh.subscribe("odom", 1, &cbOdom);
 
     // Publishers
     ros::Publisher pub_path = nh.advertise<nav_msgs::Path>("path", 1, true);
@@ -251,7 +258,12 @@ int main(int argc, char **argv)
                     // doing the following manner results in the front of trajectory being the goal, and the back being close to the rbt position
                     trajectory.clear();
 
-                    std::vector<Position> velocities = get_velocities(post_process_path);
+                    // velocity stored as Position cos why not
+                    Position curr_vel = 
+                    Position(msg_odom.twist.twist.linear.x*cos(msg_odom.twist.twist.angular.z),
+                             msg_odom.twist.twist.linear.x*sin(msg_odom.twist.twist.angular.z));
+
+                    std::vector<Position> velocities = get_velocities(post_process_path, curr_vel);
 
                     for (int m = 1; m < post_process_path.size(); ++m)
                     {
@@ -315,7 +327,7 @@ int main(int argc, char **argv)
                     if (updated_pos_goal.x == pos_goal.x && updated_pos_goal.y == pos_goal.y){
                         ROS_WARN(" TMAIN : Goal lies on inaccessible area. No path can be found");
                     } else {
-                        goals[g] = updated_pos_goal;
+                        pos_goal = updated_pos_goal;
                     }
                 }
             }

@@ -32,3 +32,4 @@ Kd_ang: 0.6
 max_ang_vel: 2.84 # max is 2.84
 max_ang_acc: 2
 move_iter_rate: 25
+dir_threshold: 0.1
