@@ -79,6 +79,9 @@ int main(int argc, char **argv)
     double close_enough;
     if (!nh.param("close_enough", close_enough, 0.0))
         ROS_WARN(" TMOVE : Param close_enough not found, set to 0");
+    double dir_threshold;
+    if (!nh.param("dir_threshold", dir_threshold, 0.0))
+        ROS_WARN(" TMOVE : Param dir_threshold not found, set to 0");
 
     // Subscribers
     ros::Subscriber sub_target = nh.subscribe("target", 1, &cbTarget);
@@ -108,7 +111,7 @@ int main(int argc, char **argv)
 
     ////////////////// DECLARE VARIABLES HERE //////////////////
     double target_heading = heading(pos_rbt, target);
-    double direction = abs(limit_angle(target_heading-ang_rbt))<M_PI/2 ? 1 : -1;
+    double direction = abs(limit_angle(target_heading-ang_rbt))<=M_PI/2 ? 1 : -1;
     double e_ang_prev = direction == 1
         ? limit_angle(target_heading - ang_rbt)
         : limit_angle(target_heading - ang_rbt - M_PI/2);
@@ -134,7 +137,9 @@ int main(int argc, char **argv)
             
             // error
             target_heading = heading(pos_rbt, target);
-            direction = abs(limit_angle(target_heading-ang_rbt))<=M_PI/2 ? 1 : -1;
+            direction = abs(M_PI/2-abs(limit_angle(target_heading-ang_rbt))) < dir_threshold 
+                ? direction 
+                : (abs(limit_angle(target_heading-ang_rbt))<=M_PI/2 ? 1 : -1);
             double e_ang = (direction == 1)
                 ? limit_angle(target_heading - ang_rbt)
                 : limit_angle(target_heading - ang_rbt - M_PI);
@@ -151,7 +156,7 @@ int main(int argc, char **argv)
             // set speed
             double unsat_lin_vel = p_lin + i_lin + d_lin;
             double sat_lin_acc = saturate(max_lin_acc, -max_lin_acc, (unsat_lin_vel-cmd_lin_vel)/dt);
-            cmd_lin_vel = saturate(max_lin_vel, -max_lin_vel, cmd_lin_vel+sat_lin_acc*dt)* (1 - abs(e_ang/M_PI/2));
+            cmd_lin_vel = saturate(max_lin_vel, -max_lin_vel, cmd_lin_vel+sat_lin_acc*dt)* (1 - abs(e_ang/(M_PI/2)));
             double unsat_ang_vel = p_ang + i_ang + d_ang;
             double sat_ang_acc = saturate(max_ang_acc, -max_ang_acc, (unsat_ang_vel-cmd_ang_vel)/dt);
             cmd_ang_vel = saturate(max_ang_vel, -max_ang_vel, cmd_ang_vel+sat_ang_acc*dt);

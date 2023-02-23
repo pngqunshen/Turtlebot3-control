@@ -210,9 +210,7 @@ Position Grid::closestFreeSpace(Position pos_goal)
 
         for (int i = -1; i < 2; i++) {
             for(int j = -1; j < 2; j++) {
-                double eye = i;
-                double jay = j;
-                Position newPos = Position( pos_x + (eye * cell_size), pos_y + (jay * cell_size));
+                Position newPos = Position(pos_x + i * cell_size, pos_y + j * cell_size);
                 if (!out_of_map(pos2idx(newPos)) && visited_indexes.find(get_key(pos2idx(newPos))) == visited_indexes.end() ) {
                     frontier.push(newPos);
                 }
