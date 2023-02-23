@@ -13,9 +13,9 @@ source devel/setup.bash
 source `rospack find ee4308_bringup`/worlds/`echo $WORLD`.sh
 
 # reset the gazebo
-echo "Resetting Gazebo. Wait 1s for Gazebo to complete reset."
-rosservice call /gazebo/reset_simulation
-sleep 1s # allow gazebo to reset so as not to mess with the time.
+# echo "Resetting Gazebo. Wait 1s for Gazebo to complete reset."
+# rosservice call /gazebo/reset_simulation
+# sleep 1s # allow gazebo to reset so as not to mess with the time.
 # roslaunch code for reset sim. Put here for reference
 #    <node pkg="rosservice" type="rosservice" name="reset_simulation" args="call --wait /gazebo/reset_simulation {}" /> 
 
@@ -26,3 +26,4 @@ roslaunch ee4308_bringup run_`echo $EE4308_TASK`.launch
 # try to stop. This will show an error if ./bringup.launch is not running
 echo "Stopping Turtlebot3 by publishing to /turtle/cmd_vel"
 rostopic pub -1 /turtle/cmd_vel geometry_msgs/Twist  '{linear:  {x: 0.0, y: 0.0, z: 0.0}, angular: {x: 0.0,y: 0.0,z: 0.0}}'
+

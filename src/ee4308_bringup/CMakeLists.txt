@@ -9,6 +9,8 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   sensor_msgs
   std_msgs
+  tf2
+  tf2_ros
 )
 
 catkin_package(
@@ -21,9 +23,17 @@ catkin_package(
     rospy 
     sensor_msgs 
     std_msgs 
+    tf2
+    tf2_ros
 )
 
 include_directories(
 include
   ${catkin_INCLUDE_DIRS}
 )
+
+add_executable(
+  tf2_turtle
+    src/tf2_turtle.cpp)
+target_link_libraries(tf2_turtle ${catkin_LIBRARIES})
+
