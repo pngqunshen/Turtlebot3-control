@@ -28,30 +28,16 @@ Planner::Planner(Grid & grid) // assumes the size of the grid is always the same
 void Planner::add_to_open(Node * node)
 {   // sort node into the open list
     double node_f = node->g + node->h;
-
-    for (int n = 0; n < open_list.size(); ++n)
-    {
-        Open & open_node = open_list[n];
-        if (open_node.f > node_f + 1e-5)
-        {   // the current node in open is guaranteed to be more expensive than the node to be inserted ==> insert at current location            
-            open_list.emplace(open_list.begin() + n, node_f, node->idx);
-
-            // emplace is equivalent to the below but more efficient:
-            // Open new_open_node = Open(node_f, node->idx);
-            // open_list.insert(open_list.begin() + n, new_open_node);
-            return;
-        }
-    }
-    // at this point, either open_list is empty or node_f is more expensive that all open nodes in the open list
-    open_list.emplace_back(node_f, node->idx);
+    Open new_open_node = Open(node_f, node->idx);
+    open_list.push(new_open_node);
 }
 Planner::Node * Planner::poll_from_open()
 {   
-    Index & idx = open_list.front().idx; //ref is faster than copy
+    Index idx = open_list.top().idx; //ref is faster than copy
     int k = grid.get_key(idx);
     Node * node = &(nodes[k]);
 
-    open_list.pop_front();
+    open_list.pop();
 
     return node;
 }
@@ -195,7 +181,10 @@ std::vector<Index> Planner::get(Index idx_start, Index idx_goal)
     }
 
     // clear open list
-    open_list.clear();
+    while (!open_list.empty())
+    {
+        open_list.pop();
+    }
     return path_idx; // is empty if open list is empty
 }
 

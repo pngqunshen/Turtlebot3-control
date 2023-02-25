@@ -2,7 +2,7 @@
 #include "grid.hpp"
 #include "common.hpp"
 #include <vector>
-#include <deque>
+#include <queue>
 
 #ifndef PLANNER_HPP
 #define PLANNER_HPP
@@ -23,6 +23,12 @@ class Planner
             Open();
             Open(double f, Index idx);
         };
+        struct CompareOpen {
+            bool operator()(Open const& o1, Open const& o2)
+            {
+                return o1.f > o2.f;
+            }
+        };
         Index start, goal;
         Grid & grid; // REFERENCE <-- you cannot put the Planner class into containers (vectors , arrays etc.) 
         
@@ -32,7 +38,7 @@ class Planner
 
     private:
         std::vector<Node> nodes; // keeps a record of the cheapest cost of every cell in the grid, as well as their parents
-        std::deque<Open> open_list;
+        std::priority_queue<Open, std::vector<Open>, CompareOpen> open_list;
         Index NB_LUT[8] = {{1,0}, {1,1}, {0,1}, {-1,1}, {-1,0}, {-1,-1}, {0,-1}, {1,-1}};
 
         void add_to_open(Node * node);
