@@ -2,6 +2,8 @@
 
 Path planning and control of turtlebot3 for EE4308 Autonomous Robot Systems project
 
+![demo](demo.gif)
+
 ## Features
 1. Theta\* planner
 2. Quintic Hermite trajectory planner
